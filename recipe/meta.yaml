@@ -11,6 +11,7 @@ source:
   folder: source
   patches:
     - 0001-support-range-of-cmakes.patch
+    - set-cxx-standard-minimum-through-target_compile.patch
 
 build:
   skip: true  # [win]
