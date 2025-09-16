@@ -38,7 +38,6 @@ simulations.
 was limited to the evolution with a single lepton in the $\overline{\rm MS}$
 renormalisation and factorisation schemes.
 
-
 Current build status
 ====================
 

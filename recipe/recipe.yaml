@@ -1,23 +1,24 @@
-{% set name = "emela" %}
-{% set version = "1.0" %}
+schema_version: 1
+
+context:
+  name: emela
+  version: 1.0
 
 package:
-  name: {{ name }}
-  version: {{ version }}
+  name: ${{ name }}
+  version: ${{ version }}
 
 source:
-  url: https://github.com/gstagnit/{{ name }}/archive/v{{ version }}.tar.gz
+  url: https://github.com/gstagnit/${{ name }}/archive/v${{ version }}.tar.gz
   sha256: 53a867616f7ae0b03928c5a9db4b1b04a6b29794c9492a96b19dfea64b1c856d
-  folder: source
+  target_directory: source
   patches:
     - 0001-support-range-of-cmakes.patch
     - set-cxx-standard-minimum-through-target_compile.patch
 
 build:
-  skip: true  # [win]
-  number: 3
-  run_exports:
-    - {{ pin_subpackage('emela', max_pin='x.x') }}
+  number: 4
+  skip: win
   script:
     - cmake ${CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=$PREFIX -DWITH_LHAPDF=ON -S source -B build
     - cmake -LH build
@@ -26,9 +27,9 @@ build:
 
 requirements:
   build:
-    - {{ stdlib('c') }}
-    - {{ compiler('cxx') }}
-    - {{ compiler('fortran') }}
+    - ${{ stdlib('c') }}
+    - ${{ compiler('cxx') }}
+    - ${{ compiler('fortran') }}
     - cmake
     - make
   host:
@@ -36,59 +37,69 @@ requirements:
     - lhapdf
   run:
     - lhapdf
+  run_exports:
+    - ${{ pin_subpackage('emela', upper_bound='x.x') }}
 
-test:
-  source_files:
-    - source/example
-  requires:
-    - {{ compiler('cxx') }}
-    - cmake
-    - make
-    - curl
-    - tar
-  commands:
-    - test -f $PREFIX/include/eMELA/version.h
-    - test -f $PREFIX/include/eMELA/bspdf.hh
-    - test -f $PREFIX/include/eMELA/analytics.hh
-    - test -f $PREFIX/include/eMELA/specialfunctions.hh
-    - test -f $PREFIX/include/eMELA/version.h.in
-    - test -f $PREFIX/include/eMELA/constants.hh
-    - test -f $PREFIX/include/eMELA/eMELA.hh
-    - test -f $PREFIX/include/eMELA/grid.hh
-    - test -f $PREFIX/include/eMELA/ilc500.hh
-    - test -f $PREFIX/include/eMELA/numerics.hh
-    - test -f $PREFIX/lib/libeMELA${SHLIB_EXT}
-    - test -f $PREFIX/bin/eMELA-config
+tests:
+  - package_contents:
+      strict: true
+      files:
+        - etc/conda/test-files/emela/0/source/example/*
+      include:
+        - eMELA/version.h
+        - eMELA/bspdf.hh
+        - eMELA/analytics.hh
+        - eMELA/specialfunctions.hh
+        - eMELA/version.h.in
+        - eMELA/constants.hh
+        - eMELA/eMELA.hh
+        - eMELA/grid.hh
+        - eMELA/ilc500.hh
+        - eMELA/numerics.hh
+      lib:
+        - eMELA
+      bin:
+        - eMELA-config
 
-    - eMELA-config --help
-    - eMELA-config --prefix
-    - eMELA-config --incdir
-    - eMELA-config --libdir
-    - eMELA-config --data
-    - eMELA-config --cppflags
-    - eMELA-config --cxxflags
-    - eMELA-config --ldflags
+  - files:
+      source:
+        - source/example
+    requirements:
+      run:
+        - ${{ compiler('cxx') }}
+        - cmake
+        - make
+        - curl
+        - tar
+    script:
+      - eMELA-config --help
+      - eMELA-config --prefix
+      - eMELA-config --incdir
+      - eMELA-config --libdir
+      - eMELA-config --data
+      - eMELA-config --cppflags
+      - eMELA-config --cxxflags
+      - eMELA-config --ldflags
 
-    - cd source/example
-    - $CXX CreateGrid.cc -o CreateGrid $CXXFLAGS $LDFLAGS $(eMELA-config --ldflags)
-    # Skip as extremely slow with 50000 grid points
-    # - ./CreateGrid NLL DELTA MSBAR
-    - test -f ./CreateGrid
-    - $CXX GetPdf.cc -o GetPdf $CXXFLAGS $LDFLAGS $(eMELA-config --ldflags)
-    - ./GetPdf
+      - cd source/example
+      - $CXX CreateGrid.cc -o CreateGrid $CXXFLAGS $LDFLAGS $(eMELA-config --ldflags)
+      # Skip as extremely slow with 50000 grid points
+      # - ./CreateGrid NLL DELTA MSBAR
+      - test -f ./CreateGrid
+      - $CXX GetPdf.cc -o GetPdf $CXXFLAGS $LDFLAGS $(eMELA-config --ldflags)
+      - ./GetPdf
 
-    # Download the grids from the GitHub releases page
-    # https://github.com/gstagnit/eMELA/releases/tag/v1.0
-    - curl -sLO https://github.com/gstagnit/eMELA/releases/download/v1.0/grids.tar.gz
-    - tar -xzf grids.tar.gz
-    - export LHAPDF_DATA_PATH=$(readlink -f ./grids):$(lhapdf-config --datadir):$LHAPDF_DATA_PATH
+      # Download the grids from the GitHub releases page
+      # https://github.com/gstagnit/eMELA/releases/tag/v1.0
+      - curl -sLO https://github.com/gstagnit/eMELA/releases/download/v1.0/grids.tar.gz
+      - tar -xzf grids.tar.gz
+      - export LHAPDF_DATA_PATH=$(readlink -f ./grids):$(lhapdf-config --datadir):$LHAPDF_DATA_PATH
 
-    - $CXX GetPdfGrid.cc -o GetPdfGrid $CXXFLAGS $LDFLAGS $(eMELA-config --ldflags) $(lhapdf-config --ldflags)
-    - ./GetPdfGrid
+      - $CXX GetPdfGrid.cc -o GetPdfGrid $CXXFLAGS $LDFLAGS $(eMELA-config --ldflags) $(lhapdf-config --ldflags)
+      - ./GetPdfGrid
 
 about:
-  home: https://github.com/gstagnit/eMELA
-  summary: 'emela: an improved QED-version of MELA'
+  summary: "emela: an improved QED-version of MELA"
   description: |
     ``eMELA`` is a library that implements the evolution in pure QED of the
     unpolarised electron parton distribution functions (PDFs) up to
@@ -117,9 +128,9 @@ about:
     was limited to the evolution with a single lepton in the $\overline{\rm MS}$
     renormalisation and factorisation schemes.
   license: MIT
-  license_family: MIT
   license_file: source/LICENSE
-  dev_url: https://github.com/gstagnit/eMELA
+  homepage: https://github.com/gstagnit/eMELA
+  repository: https://github.com/gstagnit/eMELA
 
 extra:
   recipe-maintainers:
