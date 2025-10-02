@@ -12,9 +12,6 @@ source:
   url: https://github.com/gstagnit/${{ name }}/archive/v${{ version }}.tar.gz
   sha256: 4495aaf754fb9da22d222f2a58761262beb012a907d6d2ec1d9b637c4f4743d2
   target_directory: source
-  patches:
-    - 0001-support-range-of-cmakes.patch
-    - set-cxx-standard-minimum-through-target_compile.patch
 
 build:
   number: 0
