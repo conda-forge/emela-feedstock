@@ -2,7 +2,7 @@ schema_version: 1
 
 context:
   name: emela
-  version: 1.0
+  version: "1.0.1"
 
 package:
   name: ${{ name }}
@@ -10,14 +10,11 @@ package:
 
 source:
   url: https://github.com/gstagnit/${{ name }}/archive/v${{ version }}.tar.gz
-  sha256: 53a867616f7ae0b03928c5a9db4b1b04a6b29794c9492a96b19dfea64b1c856d
+  sha256: 4495aaf754fb9da22d222f2a58761262beb012a907d6d2ec1d9b637c4f4743d2
   target_directory: source
-  patches:
-    - 0001-support-range-of-cmakes.patch
-    - set-cxx-standard-minimum-through-target_compile.patch
 
 build:
-  number: 4
+  number: 0
   skip: win
   script:
     - cmake ${CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=$PREFIX -DWITH_LHAPDF=ON -S source -B build
@@ -73,6 +70,7 @@ tests:
         - tar
     script:
       - eMELA-config --help
+      - eMELA-config --version
       - eMELA-config --prefix
       - eMELA-config --incdir
       - eMELA-config --libdir
@@ -90,8 +88,8 @@ tests:
       - ./GetPdf
 
       # Download the grids from the GitHub releases page
-      # https://github.com/gstagnit/eMELA/releases/tag/v1.0
-      - curl -sLO https://github.com/gstagnit/eMELA/releases/download/v1.0/grids.tar.gz
+      # https://github.com/gstagnit/eMELA/releases/tag/v1.0.1
+      - curl -sLO https://github.com/gstagnit/eMELA/releases/download/v${{ version }}/grids.tar.gz
       - tar -xzf grids.tar.gz
       - export LHAPDF_DATA_PATH=$(readlink -f ./grids):$(lhapdf-config --datadir):$LHAPDF_DATA_PATH
 
