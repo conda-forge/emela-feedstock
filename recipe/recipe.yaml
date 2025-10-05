@@ -70,6 +70,7 @@ tests:
         - tar
     script:
       - eMELA-config --help
+      - eMELA-config --version
       - eMELA-config --prefix
       - eMELA-config --incdir
       - eMELA-config --libdir
@@ -87,8 +88,8 @@ tests:
       - ./GetPdf
 
       # Download the grids from the GitHub releases page
-      # https://github.com/gstagnit/eMELA/releases/tag/v1.0
-      - curl -sLO https://github.com/gstagnit/eMELA/releases/download/v1.0/grids.tar.gz
+      # https://github.com/gstagnit/eMELA/releases/tag/v1.0.1
+      - curl -sLO https://github.com/gstagnit/eMELA/releases/download/v${{ version }}/grids.tar.gz
       - tar -xzf grids.tar.gz
       - export LHAPDF_DATA_PATH=$(readlink -f ./grids):$(lhapdf-config --datadir):$LHAPDF_DATA_PATH
 
