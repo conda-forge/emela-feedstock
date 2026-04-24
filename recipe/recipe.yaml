@@ -14,7 +14,7 @@ source:
   target_directory: source
 
 build:
-  number: 0
+  number: 1
   skip: win
   script:
     - cmake ${CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=$PREFIX -DWITH_LHAPDF=ON -S source -B build
